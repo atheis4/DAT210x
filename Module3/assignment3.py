@@ -13,6 +13,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+df = pd.read_csv('Datasets/wheat.data')
 
 
 fig = plt.figure()
@@ -25,6 +26,12 @@ fig = plt.figure()
 # 
 # .. your code here ..
 
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(df.area, df.perimeter, df.asymmetry, c='red')
+ax.set_xlabel('Area')
+ax.set_ylabel('Perimeter')
+ax.set_zlabel('Asymmetry')
+
 
 fig = plt.figure()
 #
@@ -36,6 +43,11 @@ fig = plt.figure()
 # 
 # .. your code here ..
 
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(df.width, df.groove, df.length, c='green')
+ax.set_xlabel('Width')
+ax.set_xlabel('Groove')
+ax.set_zlabel('Length')
 
 plt.show()
 

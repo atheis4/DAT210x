@@ -12,12 +12,17 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+df = pd.read_csv('Datasets/wheat.data')
+print(df.head(5))
+print(df.columns)
 
 #
 # TODO: Create a 2d scatter plot that graphs the
 # area and perimeter features
 # 
 # .. your code here ..
+
+df.plot.scatter(x='area', y='perimeter')
 
 
 #
@@ -26,6 +31,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+df.plot.scatter(x='groove', y='asymmetry', marker='^')
 
 #
 # TODO: Create a 2d scatter plot that graphs the
@@ -33,7 +39,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
-
+df.plot.scatter(x='compactness', y='width', marker='o')
 
 # BONUS TODO:
 # After completing the above, go ahead and run your program

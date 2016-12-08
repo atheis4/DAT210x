@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 from scipy import misc
@@ -15,6 +17,9 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+samples = []
+
+
 #
 # TODO: Write a for-loop that iterates over the images in the
 # Module4/Datasets/ALOI/32/ folder, appending each of them to
@@ -29,6 +34,14 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+path = 'Datasets/ALOI/32/'
+
+for filename in os.listdir(path):
+    img = misc.imread(path + filename)
+    img = img[::2, ::2]
+    img = (img / 255.0).reshape(-1)
+    samples.append(img)
+
 
 #
 # TODO: Once you're done answering the first three questions,
@@ -39,12 +52,31 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+add_img = 'Datasets/ALOI/32i/'
+
+for filename in os.listdir(add_img):
+    img = misc.imread(add_img + filename)
+    img = img[::2, ::2]
+    img = (img / 255.0).reshape(-1)
+    samples.append(img)
+
+
+colors = []
+
+for i in range(len(os.listdir(path))):
+    colors.append('b')
+    
+for _ in range(len(os.listdir(add_img))):
+    colors.append('r')
+
+
 
 #
 # TODO: Convert the list to a dataframe
 #
 # .. your code here .. 
 
+df = pd.DataFrame(samples)
 
 
 #
@@ -53,6 +85,11 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+from sklearn.manifold import Isomap
+
+iso = Isomap(n_neighbors=6, n_components=3)
+iso.fit(df)
+manifold = iso.transform(df)
 
 
 #
@@ -62,7 +99,7 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
-
+plt.scatter(manifold[:, 0], manifold[:, 1], marker='o', c=colors)
 
 
 #
@@ -71,6 +108,9 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(manifold[:, 0], manifold[:, 1], manifold[:, 2], c=colors)
 
 
 plt.show()

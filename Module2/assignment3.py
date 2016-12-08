@@ -4,6 +4,11 @@ import pandas as pd
 # Ensuring you set the appropriate header column names
 #
 # .. your code here ..
+df = pd.read_csv('Module2/datasets/servo.data', names=[
+    'motor', 'screw', 'pgain', 'vgain', 'class'
+])
+
+print(df.head(5))
 
 
 # TODO: Create a slice that contains all entries
@@ -11,6 +16,9 @@ import pandas as pd
 # length of (# of samples in) that slice:
 #
 # .. your code here ..
+
+vgain_df = df[df.vgain == 5]
+print(len(vgain_df))
 
 
 # TODO: Create a slice that contains all entries
@@ -20,6 +28,8 @@ import pandas as pd
 #
 # .. your code here ..
 
+motor_screw_E_df = df[(df.motor == 'E') & (df.screw == 'E')]
+print(len(motor_screw_E_df))
 
 
 # TODO: Create a slice that contains all entries
@@ -30,10 +40,12 @@ import pandas as pd
 #
 # .. your code here ..
 
+pgain_df = df[df.pgain == 4]
+print(pgain_df.vgain.mean())
 
 
 # TODO: (Bonus) See what happens when you run
 # the .dtypes method on your dataframe!
 
-
+print(df.dtypes)
 

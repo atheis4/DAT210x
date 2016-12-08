@@ -13,15 +13,28 @@ import pandas as pd
 #
 # .. your code here ..
 
+raw_col_names = [
+    'class', 'cap_shape', 'cap_surface', 'cap_color', 'bruises', 'odor',
+    'gill_attach', 'gill_spacing', 'gill_size', 'gill_color', 'stalk_shape',
+    'stalk_root', 'stalk_surface_above_ring', 'stalk_surface_below_ring',
+    'stalk_color_above_ring', 'stalk_color_below_ring', 'viel_type',
+    'viel_color', 'ring_number', 'ring_type', 'spore_print_color',
+    'population', 'habitat'
+]
+
+X = pd.read_csv('Datasets/agaricus-lepiota.data', names=raw_col_names, na_values='?')
+
+
 # INFO: An easy way to show which rows have nans in them
-#print X[pd.isnull(X).any(axis=1)]
+# print(X[pd.isnull(X).any(axis=1)])
 
 
 # 
 # TODO: Go ahead and drop any row with a nan
 #
 # .. your code here ..
-print X.shape
+
+X = X.dropna(axis=0)
 
 
 #
@@ -31,11 +44,19 @@ print X.shape
 #
 # .. your code here ..
 
+y = X.loc[:, 'class']
+X.drop(labels='class', axis=1, inplace=True)
+
+y = y.map({'p': 0, 'e': 1})
+
+
 
 #
 # TODO: Encode the entire dataset using dummies
 #
 # .. your code here ..
+
+X = pd.get_dummies(X)
 
 
 # 
@@ -45,6 +66,10 @@ print X.shape
 #
 # .. your code here ..
 
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=7)
+
 
 
 #
@@ -52,13 +77,22 @@ print X.shape
 #
 # .. your code here ..
 
+from sklearn import tree
+
+model = tree.DecisionTreeClassifier()
+
  
 #
 # TODO: train the classifier on the training data / labels:
 # TODO: score the classifier on the testing data / labels:
 #
 # .. your code here ..
-print "High-Dimensionality Score: ", round((score*100), 3)
+ 
+model = model.fit(X_train, y_train)
+score = model.score(X_test, y_test)
+ 
+ 
+print('High-Dimensionality Score: ', round((score*100), 3))
 
 
 #
@@ -67,5 +101,11 @@ print "High-Dimensionality Score: ", round((score*100), 3)
 # If not, `brew install graphviz. If you can't, use: http://webgraphviz.com/
 #
 # .. your code here ..
+
+tree.export_graphviz(model.tree_, out_file='tree.dot', feature_names=X_train.columns)
+
+from subprocess import call
+
+call(['dot', '-T', 'png', 'tree.dot', '-o', 'tree.png'])
 
 

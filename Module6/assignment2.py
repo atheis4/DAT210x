@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # The Dataset comes from:
 # https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits
@@ -9,110 +10,142 @@ import pandas as pd
 
 
 def load(path_test, path_train):
-  # Load up the data.
-  # You probably could have written this..
-  with open(path_test, 'r')  as f: testing  = pd.read_csv(f)
-  with open(path_train, 'r') as f: training = pd.read_csv(f)
+    # Load up the data.
+    # You probably could have written this..
+    with open(path_test, 'r')  as f: testing  = pd.read_csv(f)
+    with open(path_train, 'r') as f: training = pd.read_csv(f)
 
-  # The number of samples between training and testing can vary
-  # But the number of features better remain the same!
-  n_features = testing.shape[1]
+    # The number of samples between training and testing can vary
+    # But the number of features better remain the same!
+    n_features = testing.shape[1]
 
-  X_test  = testing.ix[:,:n_features-1]
-  X_train = training.ix[:,:n_features-1]
-  y_test  = testing.ix[:,n_features-1:].values.ravel()
-  y_train = training.ix[:,n_features-1:].values.ravel()
 
-  #
-  # Special:
+    X_test  = testing.ix[:,:n_features-1]
+    X_train = training.ix[:,:n_features-1]
+    y_test  = testing.ix[:,n_features-1:].values.ravel()
+    y_train = training.ix[:,n_features-1:].values.ravel()
 
-  return X_train, X_test, y_train, y_test
+    #
+    # Special:
+
+    
+
+    return X_train, X_test, y_train, y_test
 
 
 def peekData(X_train):
-  # The 'targets' or labels are stored in y. The 'samples' or data is stored in X
-  print "Peeking your data..."
-  fig = plt.figure()
+    # The 'targets' or labels are stored in y. The 'samples' or data is stored in X
+    print('Peeking your data...')
+    fig = plt.figure()
 
-  cnt = 0
-  for col in range(5):
-    for row in range(10):
-      plt.subplot(5, 10, cnt + 1)
-      plt.imshow(X_train.ix[cnt,:].reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
-      plt.axis('off')
-      cnt += 1
-  fig.set_tight_layout(True)
-  plt.show()
+    cnt = 0
+    for col in range(5):
+        for row in range(10):
+            plt.subplot(5, 10, cnt + 1)
+            plt.imshow(X_train.ix[cnt,:].reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
+            plt.axis('off')
+            cnt += 1
+    fig.set_tight_layout(True)
+    plt.show()
 
 
 def drawPredictions(X_train, X_test, y_train, y_test):
-  fig = plt.figure()
+    fig = plt.figure()
 
-  # Make some guesses
-  y_guess = model.predict(X_test)
+    # Make some guesses
+    y_guess = model.predict(X_test)
 
 
-  #
-  # INFO: This is the second lab we're demonstrating how to
-  # do multi-plots using matplot lab. In the next assignment(s),
-  # it'll be your responsibility to use this and assignment #1
-  # as tutorials to add in the plotting code yourself!
-  num_rows = 10
-  num_cols = 5
+    #
+    # INFO: This is the second lab we're demonstrating how to
+    # do multi-plots using matplot lab. In the next assignment(s),
+    # it'll be your responsibility to use this and assignment #1
+    # as tutorials to add in the plotting code yourself!
+    num_rows = 10
+    num_cols = 5
 
-  index = 0
-  for col in range(num_cols):
-    for row in range(num_rows):
-      plt.subplot(num_cols, num_rows, index + 1)
+    index = 0
+    for col in range(num_cols):
+        for row in range(num_rows):
+            plt.subplot(num_cols, num_rows, index + 1)
 
-      # 8x8 is the size of the image, 64 pixels
-      plt.imshow(X_test.ix[index,:].reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
+            # 8x8 is the size of the image, 64 pixels
+            plt.imshow(X_test.ix[index,:].reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
 
-      # Green = Guessed right
-      # Red = Fail!
-      fontcolor = 'g' if y_test[index] == y_guess[index] else 'r'
-      plt.title('Label: %i' % y_guess[index], fontsize=6, color=fontcolor)
-      plt.axis('off')
-      index += 1
-  fig.set_tight_layout(True)
-  plt.show()
-
+        # Green = Guessed right
+        # Red = Fail!
+        fontcolor = 'g' if y_test[index] == y_guess[index] else 'r'
+        plt.title('Label: %i' % y_guess[index], fontsize=6, color=fontcolor)
+        plt.axis('off')
+        index += 1
+    fig.set_tight_layout(True)
+    plt.show()
 
 
 #
 # TODO: Pass in the file paths to the .tes and the .tra files
-X_train, X_test, y_train, y_test = load('', '')
+X_test, X_train, y_test, y_train = load('Datasets/optdigits.tra', 'Datasets/optdigits.tes')
 
 import matplotlib.pyplot as plt
-from sklearn import svm
 
 # 
 # Get to know your data. It seems its already well organized in
 # [n_samples, n_features] form. Our dataset looks like (4389, 784).
 # Also your labels are already shaped as [n_samples].
-peekData(X_train)
+#peekData(X_train)
 
 
 #
 # TODO: Create an SVC classifier. Leave C=1, but set gamma to 0.001
 # and set the kernel to linear. Then train the model on the training
 # data / labels:
-print "Training SVC Classifier..."
+# print('Training SVC Classifier...')
 #
 # .. your code here ..
 
 
+from sklearn.svm import SVC
+from sklearn.model_selection import RandomizedSearchCV
+
+np.random.seed()
+
+g_range = np.random.uniform(0.0, 0.001, 50).astype(float)
+C_range = np.random.normal(100, 100, 50).astype(float)
+
+g_range[g_range < 0] = 0.00001
+C_range[C_range < 0] = 1
+
+param_dist = {
+    'gamma': list(g_range),
+    'C': list(C_range)
+}
+
+rand = RandomizedSearchCV(SVC(kernel='rbf'), param_dist)
+
+rand = rand.fit(X_train, y_train)
+
+best_C = rand.best_params_['C']
+best_gamma = rand.best_params_['gamma']
+
+
+
+model = SVC(C=best_C, gamma=best_gamma, kernel='rbf')
+model.fit(X_train, y_train)
 
 
 # TODO: Calculate the score of your SVC against the testing data
-print "Scoring SVC Classifier..."
+# print('Scoring SVC Classifier...')
 #
 # .. your code here ..
-print "Score:\n", score
+
+score = model.score(X_test, y_test)
+
+print('Score:\n', score)
 
 
 # Visual Confirmation of accuracy
-drawPredictions(X_train, X_test, y_train, y_test)
+
+# drawPredictions(X_train, X_test, y_train, y_test)
 
 
 #
@@ -120,7 +153,10 @@ drawPredictions(X_train, X_test, y_train, y_test)
 # By TRUE value, we mean, the actual provided label for that sample
 #
 # .. your code here ..
-print "1000th test label: ", true_1000th_test_value)
+
+# true_1000th_test_value = y_test[1000]
+
+# print('1000th test label: ', true_1000th_test_value)
 
 
 #
@@ -130,7 +166,10 @@ print "1000th test label: ", true_1000th_test_value)
 # notes from the previous module's labs.
 #
 # .. your code here ..
-print "1000th test prediction: ", guess_1000th_test_value
+
+# guess_1000th_test_value = model.predict(X_test.loc[1000, :])
+
+# print('1000th test prediction: ', guess_1000th_test_value)
 
 
 #
@@ -138,6 +177,8 @@ print "1000th test prediction: ", guess_1000th_test_value
 # visually check if it was a hard image, or an easy image
 #
 # .. your code here ..
+
+#plt.imshow(X_test.loc[1000, :].reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
 
 
 #

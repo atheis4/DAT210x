@@ -11,6 +11,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+df = pd.read_csv('Datasets/wheat.data')
 
 #
 # TODO: Create a slice of your dataframe (call it s1)
@@ -18,6 +19,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+s1 = df.loc[:, ['area', 'perimeter']]
 
 #
 # TODO: Create another slice of your dataframe (call it s2)
@@ -25,6 +27,7 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+s2 = df.loc[:, ['groove', 'asymmetry']]
 
 #
 # TODO: Create a histogram plot using the first slice,
@@ -33,6 +36,8 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+s1.plot.hist(alpha=0.75)
+s2.plot.hist(alpha=0.75)
 
 plt.show()
 

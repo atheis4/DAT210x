@@ -8,6 +8,14 @@ import numpy as np
 #
 # .. your code here ..
 
+col_headers = [
+    'education', 'age', 'capital-gain', 'race', 'capital-loss',
+    'hours-per-week', 'sex', 'classification'
+]
+
+df = pd.read_csv('datasets/census.data', names=col_headers, na_values='?')
+
+print(df.head(5))
 
 
 #
@@ -25,6 +33,9 @@ import numpy as np
 #
 # .. your code here ..
 
+print(df.dtypes)
+for i in col_headers:
+    print(i, df.loc[:, i].unique())
 
 
 #
@@ -40,7 +51,34 @@ import numpy as np
 #
 # .. your code here ..
 
+education_ordered = [
+    'Preschool', '1st-4th', '5th-6th', '7th-8th', '9th', '10th', '11th',
+    '12th', 'HS-grad', 'Some-college', 'Bachelors', 'Masters', 'Doctorate'
+]
 
+classification_ordered = [
+    '<=50K', '>50K'
+]
+
+# Edu astype()
+df.education = df.education.astype('category',
+                                   ordered=True,
+                                   categories=education_ordered
+).cat.codes
+
+# Classification astype()
+df.classification = df.classification.astype('category',
+                                   ordered=True,
+                                   categories=classification_ordered
+).cat.codes
+
+# Race boolean explosion
+df = pd.get_dummies(df, columns=['race'])
+
+# Sex boolean explosion
+df = pd.get_dummies(df, columns=['sex'])
+
+print(df.head(5))
 
 #
 # TODO:

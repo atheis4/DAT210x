@@ -1,56 +1,58 @@
+import pandas as pd
+
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
 Test_PCA = True
 
 
 def plotDecisionBoundary(model, X, y):
-  print "Plotting..."
-  import matplotlib.pyplot as plt
-  import matplotlib
-  matplotlib.style.use('ggplot') # Look Pretty
+    print('Plotting...')
+    import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.style.use('ggplot') # Look Pretty
 
-  fig = plt.figure()
-  ax = fig.add_subplot(111)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-  padding = 0.1
-  resolution = 0.1
+    padding = 0.1
+    resolution = 0.1
 
-  #(2 for benign, 4 for malignant)
-  colors = {2:'royalblue',4:'lightsalmon'} 
+    #(2 for benign, 4 for malignant)
+    colors = {2:'royalblue',4:'lightsalmon'} 
 
   
-  # Calculate the boundaris
-  x_min, x_max = X[:, 0].min(), X[:, 0].max()
-  y_min, y_max = X[:, 1].min(), X[:, 1].max()
-  x_range = x_max - x_min
-  y_range = y_max - y_min
-  x_min -= x_range * padding
-  y_min -= y_range * padding
-  x_max += x_range * padding
-  y_max += y_range * padding
+    # Calculate the boundaris
+    x_min, x_max = X[:, 0].min(), X[:, 0].max()
+    y_min, y_max = X[:, 1].min(), X[:, 1].max()
+    x_range = x_max - x_min
+    y_range = y_max - y_min
+    x_min -= x_range * padding
+    y_min -= y_range * padding
+    x_max += x_range * padding
+    y_max += y_range * padding
 
-  # Create a 2D Grid Matrix. The values stored in the matrix
-  # are the predictions of the class at at said location
-  import numpy as np
-  xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
+    # Create a 2D Grid Matrix. The values stored in the matrix
+    # are the predictions of the class at at said location
+    import numpy as np
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
                        np.arange(y_min, y_max, resolution))
 
-  # What class does the classifier say?
-  Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-  Z = Z.reshape(xx.shape)
+    # What class does the classifier say?
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
 
-  # Plot the contour map
-  plt.contourf(xx, yy, Z, cmap=plt.cm.seismic)
-  plt.axis('tight')
+    # Plot the contour map
+    plt.contourf(xx, yy, Z, cmap=plt.cm.seismic)
+    plt.axis('tight')
 
-  # Plot your testing points as well...
-  for label in np.unique(y):
-    indices = np.where(y == label)
-    plt.scatter(X[indices, 0], X[indices, 1], c=colors[label], alpha=0.8)
+    # Plot your testing points as well...
+    for label in np.unique(y):
+        indices = np.where(y == label)
+        plt.scatter(X[indices, 0], X[indices, 1], c=colors[label], alpha=0.8)
 
-  p = model.get_params()
-  plt.title('K = ' + str(p['n_neighbors']))
-  plt.show()
+    p = model.get_params()
+    plt.title('K = ' + str(p['n_neighbors']))
+    plt.show()
 
 
 # 
@@ -59,6 +61,10 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+col_names = ['sample', 'thickness', 'size', 'shape', 'adhesion', 'epithelial',
+             'nuclei', 'chromatin', 'nucleoli', 'mitoses', 'status']
+
+X = pd.read_csv('Datasets/breast-cancer-wisconsin.data', names=col_names, na_values='?')
 
 
 # 
@@ -68,6 +74,9 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+y = X['status'].copy()
+
+X.drop(labels=['sample', 'status'], inplace=True, axis=1)
 
 
 #
@@ -76,6 +85,7 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+X = X.fillna(X.mean())
 
 
 #
@@ -85,7 +95,9 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.model_selection import train_test_split
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=7)
 
 
 #
@@ -96,6 +108,28 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.preprocessing import Normalizer, MaxAbsScaler, MinMaxScaler, StandardScaler, RobustScaler
+
+norm = Normalizer().fit(X_train)
+max_abs = MaxAbsScaler().fit(X_train)
+min_max = MinMaxScaler().fit(X_train)
+stand = StandardScaler().fit(X_train)
+robust = RobustScaler().fit(X_train)
+
+#X_train = norm.transform(X_train)
+#X_test = norm.transform(X_test)
+
+#X_train = max_abs.transform(X_train)
+#X_test = max_abs.transform(X_test)
+
+#X_train = min_max.transform(X_train)
+#X_test = min_max.transform(X_test)
+
+#X_train = stand.transform(X_train)
+#X_test = stand.transform(X_test)
+
+#X_train = robust.transform(X_train)
+#X_test = robust.transform(X_test)
 
 
 
@@ -103,25 +137,32 @@ def plotDecisionBoundary(model, X, y):
 # PCA and Isomap are your new best friends
 model = None
 if Test_PCA:
-  print "Computing 2D Principle Components"
-  #
-  # TODO: Implement PCA here. save your model into the variable 'model'.
-  # You should reduce down to two dimensions.
-  #
-  # .. your code here ..
+    print('Computing 2D Principle Components')
+    #
+    # TODO: Implement PCA here. save your model into the variable 'model'.
+    # You should reduce down to two dimensions.
+    #
+    # .. your code here ..
+    
+    from sklearn.decomposition import PCA
+    
+    model = PCA(n_components=2)
+    model.fit(X_train)
 
-  
 
 else:
-  print "Computing 2D Isomap Manifold"
-  #
-  # TODO: Implement Isomap here. save your model into the variable 'model'
-  # Experiment with K values from 5-10.
-  # You should reduce down to two dimensions.
-  #
-  # .. your code here ..
-  
-
+    print('Computing 2D Isomap Manifold')
+    #
+    # TODO: Implement Isomap here. save your model into the variable 'model'
+    # Experiment with K values from 5-10.
+    # You should reduce down to two dimensions.
+    #
+    # .. your code here ..
+    
+    from sklearn.manifold import Isomap
+    
+    model = Isomap(n_neighbors=5, n_components=2)
+    model.fit(X_train)
 
 
 #
@@ -131,6 +172,8 @@ else:
 #
 # .. your code here ..
 
+X_train = model.transform(X_train)
+X_test = model.transform(X_test)
 
 
 # 
@@ -142,6 +185,11 @@ else:
 # parameter affects the results.
 #
 # .. your code here ..
+
+from sklearn.neighbors import KNeighborsClassifier
+
+knmodel = KNeighborsClassifier(n_neighbors=15, weights='distance')
+knmodel.fit(X_train, y_train)
 
 
 
@@ -161,6 +209,8 @@ else:
 # TODO: Calculate + Print the accuracy of the testing set
 #
 # .. your code here ..
+
+accuracy_score = knmodel.score(X_test, y_test)
 
 
 plotDecisionBoundary(knmodel, X_test, y_test)

@@ -26,7 +26,6 @@ armadillo = pd.DataFrame({
 })
 
 
-
 def do_PCA(armadillo):
   #
   # TODO: Write code to import the libraries required for PCA.
@@ -41,7 +40,13 @@ def do_PCA(armadillo):
   #
   # .. your code here ..
 
-  return None
+    from sklearn.decomposition import PCA
+    
+    pca = PCA(n_components=2)
+    pca.fit(armadillo)
+    pca = pca.transform(armadillo)
+
+    return pca
 
 
 def do_RandomizedPCA(armadillo):
@@ -58,8 +63,13 @@ def do_RandomizedPCA(armadillo):
   # you automatically. =)
   #
   # .. your code here ..
+    from sklearn.decomposition import PCA
+    
+    pca = PCA(n_components=2, svd_solver='randomized')
+    pca.fit(armadillo)
+    pca = pca.transform(armadillo)
 
-  return None
+    return pca
 
 
 
@@ -78,6 +88,8 @@ ax.scatter(armadillo.x, armadillo.y, armadillo.z, c='green', marker='.', alpha=0
 t1 = datetime.datetime.now()
 for i in range(5000): pca = do_PCA(armadillo)
 time_delta = datetime.datetime.now() - t1
+
+print(pca[:, 0])
 
 # Render the newly transformed PCA armadillo!
 if not pca is None:

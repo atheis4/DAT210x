@@ -14,15 +14,16 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
-
+df = pd.read_csv('Datasets/wheat.data')
 
 #
 # TODO: Drop the 'id', 'area', and 'perimeter' feature
 # 
 # .. your code here ..
 
+df = df.drop(labels=['id'], axis=1)
 
-
+print(df.describe())
 #
 # TODO: Plot a parallel coordinates chart grouped by
 # the 'wheat_type' feature. Be sure to set the optional
@@ -30,8 +31,12 @@ matplotlib.style.use('ggplot')
 # 
 # .. your code here ..
 
+plt.figure()
+parallel_coordinates(df, 'wheat_type', alpha=0.4)
 
+for i in range(len(df)):
+    print(df.iloc[i].values)
+
+print(len(df))
 
 plt.show()
-
-

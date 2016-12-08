@@ -1,0 +1,36 @@
+digraph Tree {
+node [shape=box] ;
+0 [label="odor_f <= 0.5\nimpurity = 0.4695\nsamples = 3950\nvalue = [1487, 2463]"] ;
+1 [label="gill_size_b <= 0.5\nimpurity = 0.2351\nsamples = 2851\nvalue = [388, 2463]"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="odor_n <= 0.5\nimpurity = 0.4567\nsamples = 479\nvalue = [310, 169]"] ;
+1 -> 2 ;
+3 [label="stalk_shape_e <= 0.5\nimpurity = 0.2963\nsamples = 365\nvalue = [299, 66]"] ;
+2 -> 3 ;
+4 [label="impurity = 0.0\nsamples = 66\nvalue = [0, 66]"] ;
+3 -> 4 ;
+5 [label="impurity = 0.0\nsamples = 299\nvalue = [299, 0]"] ;
+3 -> 5 ;
+6 [label="population_c <= 0.5\nimpurity = 0.1744\nsamples = 114\nvalue = [11, 103]"] ;
+2 -> 6 ;
+7 [label="impurity = 0.0\nsamples = 103\nvalue = [0, 103]"] ;
+6 -> 7 ;
+8 [label="impurity = 0.0\nsamples = 11\nvalue = [11, 0]"] ;
+6 -> 8 ;
+9 [label="ring_number_o <= 0.5\nimpurity = 0.0636\nsamples = 2372\nvalue = [78, 2294]"] ;
+1 -> 9 ;
+10 [label="habitat_p <= 0.5\nimpurity = 0.4012\nsamples = 108\nvalue = [78, 30]"] ;
+9 -> 10 ;
+11 [label="population_y <= 0.5\nimpurity = 0.0928\nsamples = 82\nvalue = [78, 4]"] ;
+10 -> 11 ;
+12 [label="impurity = 0.0\nsamples = 78\nvalue = [78, 0]"] ;
+11 -> 12 ;
+13 [label="impurity = 0.0\nsamples = 4\nvalue = [0, 4]"] ;
+11 -> 13 ;
+14 [label="impurity = 0.0\nsamples = 26\nvalue = [0, 26]"] ;
+10 -> 14 ;
+15 [label="impurity = 0.0\nsamples = 2264\nvalue = [0, 2264]"] ;
+9 -> 15 ;
+16 [label="impurity = 0.0\nsamples = 1099\nvalue = [1099, 0]"] ;
+0 -> 16 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+}

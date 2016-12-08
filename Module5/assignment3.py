@@ -11,44 +11,50 @@ matplotlib.style.use('ggplot') # Look Pretty
 
 
 
-def showandtell(title=None):
-  if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
-  plt.show()
-  exit()
+#def showandtell(title=None):
+#    if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
+#    plt.show()
 
 def clusterInfo(model):
-  print "Cluster Analysis Inertia: ", model.inertia_
-  print '------------------------------------------'
-  for i in range(len(model.cluster_centers_)):
-    print "\n  Cluster ", i
-    print "    Centroid ", model.cluster_centers_[i]
-    print "    #Samples ", (model.labels_==i).sum() # NumPy Power
+    print('Cluster Analysis Inertia: ', model.inertia_)
+    print('------------------------------------------')
+    for i in range(len(model.cluster_centers_)):
+        print('\n  Cluster ', i)
+        print('    Centroid ', model.cluster_centers_[i])
+        print('    #Samples ', (model.labels_==i).sum()) # NumPy Power
 
 # Find the cluster with the least # attached nodes
 def clusterWithFewestSamples(model):
-  # Ensure there's at least on cluster...
-  minSamples = len(model.labels_)
-  minCluster = 0
-  for i in range(len(model.cluster_centers_)):
-    if minSamples > (model.labels_==i).sum():
-      minCluster = i
-      minSamples = (model.labels_==i).sum()
-  print "\n  Cluster With Fewest Samples: ", minCluster
-  return (model.labels_==minCluster)
+    # Ensure there's at least on cluster...
+    minSamples = len(model.labels_)
+    minCluster = 0
+    for i in range(len(model.cluster_centers_)):
+        if minSamples > (model.labels_==i).sum():
+            minCluster = i
+            minSamples = (model.labels_==i).sum()
+    print('\n  Cluster With Fewest Samples: ', minCluster)
+    return (model.labels_==minCluster)
 
 
 def doKMeans(data, clusters=0):
-  #
-  # TODO: Be sure to only feed in Lat and Lon coordinates to the KMeans algo, since none of the other
-  # data is suitable for your purposes. Since both Lat and Lon are (approximately) on the same scale,
-  # no feature scaling is required. Print out the centroid locations and add them onto your scatter
-  # plot. Use a distinguishable marker and color.
-  #
-  # Hint: Make sure you fit ONLY the coordinates, and in the CORRECT order (lat first).
-  # This is part of your domain expertise.
-  #
-  # .. your code here ..
-  return model
+    #
+    # TODO: Be sure to only feed in Lat and Lon coordinates to the KMeans algo, since none of the other
+    # data is suitable for your purposes. Since both Lat and Lon are (approximately) on the same scale,
+    # no feature scaling is required. Print out the centroid locations and add them onto your scatter
+    # plot. Use a distinguishable marker and color.
+    #
+    # Hint: Make sure you fit ONLY the coordinates, and in the CORRECT order (lat first).
+    # This is part of your domain expertise.
+    #
+    # .. your code here ..
+    from sklearn.cluster import KMeans
+    
+    model = KMeans(n_clusters=clusters)
+
+    data = data.loc[:, ['TowerLat', 'TowerLon']]
+    model.fit(data)
+    
+    return model
 
 
 
@@ -58,8 +64,15 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
+df = pd.read_csv('Datasets/CDR.csv')
 
+df.CallDate = pd.to_datetime(df.CallDate, infer_datetime_format=True, errors='coerce')
+df.CallTime = pd.to_timedelta(df.CallTime, errors='coerce')
 
+df = df[(df.DOW != 'Sat') & (df.DOW != 'Sun')]
+df = df[(df.CallTime < '17:00:00')]
+
+df.reset_index()
 
 
 #
@@ -69,33 +82,19 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
-
-#
-# INFO: The locations map above should be too "busy" to really wrap your head around. This
-# is where domain expertise comes into play. Your intuition tells you that people are likely
-# to behave differently on weekends:
-#
-# On Weekdays:
-#   1. People probably don't go into work
-#   2. They probably sleep in late on Saturday
-#   3. They probably run a bunch of random errands, since they couldn't during the week
-#   4. They should be home, at least during the very late hours, e.g. 1-4 AM
-#
-# On Weekdays:
-#   1. People probably are at work during normal working hours
-#   2. They probably are at home in the early morning and during the late night
-#   3. They probably spend time commuting between work and home everyday
+users = df.In.unique().tolist()
 
 
+print('\n\nExamining person: ', 0)
 
-
-print "\n\nExamining person: ", 0
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
 
+user1 = df[df.In == users[0]]
+user1 = user1.reset_index()
 
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
@@ -117,6 +116,11 @@ print "\n\nExamining person: ", 0
 #
 # .. your code here ..
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(user1.TowerLat, user1.TowerLon, c='blue', marker='o', alpha=0.1)
+
+
 
 
 #
@@ -126,7 +130,16 @@ print "\n\nExamining person: ", 0
 # sweep up the annoying outliers and not-home, not-work travel occasions. the other two will zero in
 # on the user's approximate home location and work locations. Or rather the location of the cell
 # tower closest to them.....
+
+
 model = doKMeans(user1, 3)
+
+print()
+print(model.labels_)
+print(model.cluster_centers_)
+print()
+
+ax.scatter(model.cluster_centers_[:, 0], model.cluster_centers_[:, 1], s=169, c='red', marker='x', alpha=0.8, linewidths=2)
 
 
 #
@@ -135,15 +148,19 @@ model = doKMeans(user1, 3)
 # The cluster with the 2nd most samples will be home. And the K=3 cluster with the least samples
 # should be somewhere in between the two. What time, on average, is the user in between home and
 # work, between the midnight and 5pm?
+
 midWayClusterIndices = clusterWithFewestSamples(model)
 midWaySamples = user1[midWayClusterIndices]
-print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
+
+print('    Its Waypoint Time: ', midWaySamples.CallTime.mean())
 
 
 #
 # Let's visualize the results!
 # First draw the X's for the clusters:
-ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+
+#ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+
 #
 # Then save the results:
-showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
+#showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed

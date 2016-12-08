@@ -7,43 +7,43 @@ matplotlib.style.use('ggplot') # Look Pretty
 
 
 def plotDecisionBoundary(model, X, y):
-  fig = plt.figure()
-  ax = fig.add_subplot(111)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-  padding = 0.6
-  resolution = 0.0025
-  colors = ['royalblue','forestgreen','ghostwhite']
+    padding = 0.6
+    resolution = 0.0025
+    colors = ['royalblue','forestgreen','ghostwhite']
 
-  # Calculate the boundaris
-  x_min, x_max = X[:, 0].min(), X[:, 0].max()
-  y_min, y_max = X[:, 1].min(), X[:, 1].max()
-  x_range = x_max - x_min
-  y_range = y_max - y_min
-  x_min -= x_range * padding
-  y_min -= y_range * padding
-  x_max += x_range * padding
-  y_max += y_range * padding
+    # Calculate the boundaris
+    x_min, x_max = X[:, 0].min(), X[:, 0].max()
+    y_min, y_max = X[:, 1].min(), X[:, 1].max()
+    x_range = x_max - x_min
+    y_range = y_max - y_min
+    x_min -= x_range * padding
+    y_min -= y_range * padding
+    x_max += x_range * padding
+    y_max += y_range * padding
 
-  # Create a 2D Grid Matrix. The values stored in the matrix
-  # are the predictions of the class at at said location
-  xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
+    # Create a 2D Grid Matrix. The values stored in the matrix
+    # are the predictions of the class at at said location
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
                        np.arange(y_min, y_max, resolution))
+                       
+    # What class does the classifier say?
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
 
-  # What class does the classifier say?
-  Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-  Z = Z.reshape(xx.shape)
+    # Plot the contour map
+    cs = plt.contourf(xx, yy, Z, cmap=plt.cm.terrain)
 
-  # Plot the contour map
-  cs = plt.contourf(xx, yy, Z, cmap=plt.cm.terrain)
-
-  # Plot the test original points as well...
-  for label in range(len(np.unique(y))):
-    indices = np.where(y == label)
+    # Plot the test original points as well...
+    for label in range(len(np.unique(y))):
+        indices = np.where(y == label)
     plt.scatter(X[indices, 0], X[indices, 1], c=colors[label], label=str(label), alpha=0.8)
 
-  p = model.get_params()
-  plt.axis('tight')
-  plt.title('K = ' + str(p['n_neighbors']))
+    p = model.get_params()
+    plt.axis('tight')
+    plt.title('K = ' + str(p['n_neighbors']))
 
 
 # 
@@ -53,6 +53,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+X = pd.read_csv('Datasets/wheat.data')
+X = X.drop(labels='id', axis=1)
 
 
 #
@@ -61,6 +63,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+y = X['wheat_type'].copy()
+X = X.drop(labels='wheat_type', axis=1)
 
 
 # TODO: Do a quick, "ordinal" conversion of 'y'. In actuality our
@@ -68,6 +72,14 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+type_ordered = [
+    'kama', 'canadian', 'rosa'
+]
+
+y = y.astype('category',
+    ordered=True,
+    categories=type_ordered             
+).cat.codes
 
 
 #
@@ -75,6 +87,7 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+X = X.fillna(X.mean())
 
 
 #
@@ -85,6 +98,9 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1)
 
 
 # 
@@ -99,6 +115,10 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.preprocessing import Normalizer
+
+norm = Normalizer()
+norm.fit(X_train)
 
 
 #
@@ -111,7 +131,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
+X_train_norm = norm.transform(X_train)
+X_test_norm = norm.transform(X_test)
 
 
 #
@@ -125,7 +146,13 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.decomposition import PCA
 
+pca = PCA(n_components=2, svd_solver='randomized')
+pca.fit(X_train_norm)
+
+pca_train = pca.transform(X_train_norm)
+pca_test = pca.transform(X_test_norm)
 
 
 #
@@ -136,11 +163,16 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+from sklearn.neighbors import KNeighborsClassifier
 
+knn = KNeighborsClassifier(n_neighbors=8)
+knn.fit(pca_train, y_train)
 
 
 # HINT: Ensure your KNeighbors classifier object from earlier is called 'knn'
-plotDecisionBoundary(knn, X_train, y_train)
+
+plotDecisionBoundary(knn, pca_train, y_train)
+
 
 
 #------------------------------------
@@ -153,7 +185,8 @@ plotDecisionBoundary(knn, X_train, y_train)
 #
 # .. your code here ..
 
-
+accuracy_score = knn.score(pca_test, y_test)
+print(accuracy_score)
 
 #
 # BONUS: Instead of the ordinal conversion, try and get this assignment

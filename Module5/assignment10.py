@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -52,6 +54,14 @@ Provided_Portion = 0.25
 #
 # .. your code here ..
 
+path = 'Datasets/recordings/'
+
+zero = []
+
+for file in os.listdir(path):
+    if file[0] == '0':
+        zero.append(wavfile.read(path+file)[1])
+        
 
 
 # 
@@ -70,6 +80,9 @@ Provided_Portion = 0.25
 #
 # .. your code here ..
 
+zero = pd.DataFrame(data=zero, dtype=np.int16)
+zero = zero.dropna(axis=1)
+zero = zero.values
 
 #
 # TODO: It's important to know how (many audio_samples samples) long the
@@ -78,6 +91,8 @@ Provided_Portion = 0.25
 # n_audio_samples
 #
 # .. your code here ..
+
+n_audio_samples = len(zero)
 
 
 
@@ -88,6 +103,10 @@ Provided_Portion = 0.25
 #
 # .. your code here ..
 
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+
 
 
 #
@@ -97,6 +116,7 @@ Provided_Portion = 0.25
 # on will be an unseen sample, independent to the rest of your
 # training set:
 from sklearn.utils.validation import check_random_state
+
 rng   = check_random_state(7)  # Leave this alone until you've submitted your lab
 random_idx = rng.randint(zero.shape[0])
 test  = zero[random_idx]
@@ -113,6 +133,8 @@ train = np.delete(zero, [random_idx], axis=0)
 #
 # .. your code here ..
 
+print(train.shape)
+print(test.shape)
 
 
 #
@@ -130,6 +152,9 @@ train = np.delete(zero, [random_idx], axis=0)
 # half of, so that you can compare it to the 'patched' clip once 
 # you've generated it. HINT: you should have got the sample_rate
 # when you were loading up the .wav files:
+
+sample_rate = 8000
+
 wavfile.write('Original Test Clip.wav', sample_rate, test)
 
 
@@ -143,6 +168,9 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 #
 # .. your code here ..
 
+index_slice = Provided_Portion * n_audio_samples
+
+X_test = test[:12]
 
 #
 # TODO: If the first Provided_Portion * n_audio_samples features were
@@ -153,6 +181,7 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 #
 # .. your code here ..
 
+y_test = test[12:]
 
 
 
@@ -168,7 +197,8 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 #
 # .. your code here ..
 
-
+X_train = train[:, :12]
+y_train = train[:, 12:]
 
 # 
 # TODO: SciKit-Learn gets mad if you don't supply your training
@@ -184,11 +214,15 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 #
 # .. your code here ..
 
+X_test = X_test.reshape(1, -1)
+y_test = y_test.reshape(1, -1)
 
 #
 # TODO: Fit your model using your training data and label:
 #
 # .. your code here ..
+
+model.fit(X_train, y_train)
 
 
 # 
@@ -196,6 +230,8 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 # resulting prediction in a variable called y_test_prediction
 #
 # .. your code here ..
+
+y_test_prediction = model.predict(X_test)
 
 
 # INFO: SciKit-Learn will use float64 to generate your predictions
@@ -209,7 +245,10 @@ y_test_prediction = y_test_prediction.astype(dtype=np.int16)
 # by passing in your test data and test label (y_test).
 #
 # .. your code here ..
-print "Extrapolation R^2 Score: ", score
+
+score = model.score(X_test, y_test)
+
+print('Extrapolation R^2 Score: ', score)
 
 
 #

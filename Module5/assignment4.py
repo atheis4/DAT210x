@@ -16,52 +16,56 @@ matplotlib.style.use('ggplot') # Look Pretty
 c = ['red', 'green', 'blue', 'orange', 'yellow', 'brown']
 
 def drawVectors(transformed_features, components_, columns, plt):
-  num_columns = len(columns)
+    num_columns = len(columns)
 
-  # This function will project your *original* feature (columns)
-  # onto your principal component feature-space, so that you can
-  # visualize how "important" each one was in the
-  # multi-dimensional scaling
+    # This function will project your *original* feature (columns)
+    # onto your principal component feature-space, so that you can
+    # visualize how "important" each one was in the
+    # multi-dimensional scaling
   
-  # Scale the principal components by the max value in
-  # the transformed set belonging to that component
-  xvector = components_[0] * max(transformed_features[:,0])
-  yvector = components_[1] * max(transformed_features[:,1])
+    # Scale the principal components by the max value in
+    # the transformed set belonging to that component
+    xvector = components_[0] * max(transformed_features[:,0])
+    yvector = components_[1] * max(transformed_features[:,1])
 
-  ## Visualize projections
+    ## Visualize projections
 
-  # Sort each column by its length. These are your *original*
-  # columns, not the principal components.
-  import math
-  important_features = { columns[i] : math.sqrt(xvector[i]**2 + yvector[i]**2) for i in range(num_columns) }
-  important_features = sorted(zip(important_features.values(), important_features.keys()), reverse=True)
-  print "Projected Features by importance:\n", important_features
+    # Sort each column by its length. These are your *original*
+    # columns, not the principal components.
+    import math
+    important_features = { columns[i] : math.sqrt(xvector[i]**2 + yvector[i]**2) for i in range(num_columns) }
+    important_features = sorted(zip(important_features.values(), important_features.keys()), reverse=True)
+    print('Projected Features by importance:\n', important_features)
 
-  ax = plt.axes()
-
-  for i in range(num_columns):
-    # Use an arrow to project each original feature as a
-    # labeled vector on your principal component axes
-    plt.arrow(0, 0, xvector[i], yvector[i], color='b', width=0.0005, head_width=0.02, alpha=0.75, zorder=600000)
-    plt.text(xvector[i]*1.2, yvector[i]*1.2, list(columns)[i], color='b', alpha=0.75, zorder=600000)
-  return ax
+    ax = plt.axes()
+      
+    for i in range(num_columns):
+        # Use an arrow to project each original feature as a
+        # labeled vector on your principal component axes
+        plt.arrow(0, 0, xvector[i], yvector[i], color='b', width=0.0005, head_width=0.02, alpha=0.75, zorder=600000)
+        plt.text(xvector[i]*1.2, yvector[i]*1.2, list(columns)[i], color='b', alpha=0.75, zorder=600000)
+    return ax
     
 
 def doPCA(data, dimensions=2):
-  from sklearn.decomposition import RandomizedPCA
-  model = RandomizedPCA(n_components=dimensions)
-  model.fit(data)
-  return model
+    from sklearn.decomposition import PCA
+    model = PCA(n_components=dimensions, svd_solver='randomized')
+    model.fit(data)
+    return model
 
 
 def doKMeans(data, clusters=0):
-  #
-  # TODO: Do the KMeans clustering here, passing in the # of clusters parameter
-  # and fit it against your data. Then, return a tuple containing the cluster
-  # centers and the labels
-  #
-  # .. your code here ..
-  return model.cluster_centers_, model.labels_
+    #
+    # TODO: Do the KMeans clustering here, passing in the # of clusters parameter
+    # and fit it against your data. Then, return a tuple containing the cluster
+    # centers and the labels
+    #
+    # .. your code here ..
+    from sklearn.cluster import KMeans    
+    
+    model = KMeans(n_clusters=clusters)
+    model.fit(data)
+    return model.cluster_centers_, model.labels_
 
 
 #
@@ -72,6 +76,10 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
+df = pd.read_csv('Datasets/Wholesale_customers_data.csv')
+
+df = df.dropna(axis=0)
+
 #
 # TODO: As instructed, get rid of the 'Channel' and 'Region' columns, since
 # you'll be investigating as if this were a single location wholesaler, rather
@@ -80,6 +88,7 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
+df = df.drop(labels=['Channel', 'Region'], axis=1)
 
 #
 # TODO: Before unitizing / standardizing / normalizing your data in preparation for
@@ -100,17 +109,18 @@ def doKMeans(data, clusters=0):
 # creme dela creme, or bottom of the barrel'ers
 #
 # Remove top 5 and bottom 5 samples for each column:
+
 drop = {}
 for col in df.columns:
-  # Bottom 5
-  sort = df.sort_values(by=col, ascending=True)
-  if len(sort) > 5: sort=sort[:5]
-  for index in sort.index: drop[index] = True # Just store the index once
+    # Bottom 5
+    sort = df.sort_values(by=col, ascending=True)
+    if len(sort) > 5: sort=sort[:5]
+    for index in sort.index: drop[index] = True # Just store the index once
 
-  # Top 5
-  sort = df.sort_values(by=col, ascending=False)
-  if len(sort) > 5: sort=sort[:5]
-  for index in sort.index: drop[index] = True # Just store the index once
+    # Top 5
+    sort = df.sort_values(by=col, ascending=False)
+    if len(sort) > 5: sort=sort[:5]
+    for index in sort.index: drop[index] = True # Just store the index once
 
 #
 # INFO Drop rows by index. We do this all at once in case there is a
@@ -118,9 +128,10 @@ for col in df.columns:
 # to, if there is a single row that satisfies the drop for multiple columns.
 # Since there are 6 rows, if we end up dropping < 5*6*2 = 60 rows, that means
 # there indeed were collisions.
-print "Dropping {0} Outliers...".format(len(drop))
+
+print('Dropping {} Outliers...'.format(len(drop)))
 df.drop(inplace=True, labels=drop.keys(), axis=0)
-print df.describe()
+print(df.describe())
 
 
 #
@@ -172,11 +183,12 @@ print df.describe()
 #
 # TODO: Un-comment just ***ONE*** of lines at a time and see how alters your results
 # Pay attention to the direction of the arrows, as well as their LENGTHS
+
 #T = preprocessing.StandardScaler().fit_transform(df)
 #T = preprocessing.MinMaxScaler().fit_transform(df)
 #T = preprocessing.MaxAbsScaler().fit_transform(df)
 #T = preprocessing.Normalizer().fit_transform(df)
-T = df # No Change
+#T = df # No Change
 
 
 #
@@ -212,14 +224,14 @@ CC = display_pca.transform(centroids)
 fig = plt.figure()
 ax = fig.add_subplot(111)
 if PLOT_TYPE_TEXT:
-  # Plot the index of the sample, so you can further investigate it in your dset
-  for i in range(len(T)): ax.text(T[i,0], T[i,1], df.index[i], color=c[labels[i]], alpha=0.75, zorder=600000)
-  ax.set_xlim(min(T[:,0])*1.2, max(T[:,0])*1.2)
-  ax.set_ylim(min(T[:,1])*1.2, max(T[:,1])*1.2)
+    # Plot the index of the sample, so you can further investigate it in your dset
+    for i in range(len(T)): ax.text(T[i,0], T[i,1], df.index[i], color=c[labels[i]], alpha=0.75, zorder=600000)
+    ax.set_xlim(min(T[:,0])*1.2, max(T[:,0])*1.2)
+    ax.set_ylim(min(T[:,1])*1.2, max(T[:,1])*1.2)
 else:
-  # Plot a regular scatter plot
-  sample_colors = [ c[labels[i]] for i in range(len(T)) ]
-  ax.scatter(T[:, 0], T[:, 1], c=sample_colors, marker='o', alpha=0.2)
+    # Plot a regular scatter plot
+    sample_colors = [ c[labels[i]] for i in range(len(T)) ]
+    ax.scatter(T[:, 0], T[:, 1], c=sample_colors, marker='o', alpha=0.2)
 
 
 # Plot the Centroids as X's, and label them
@@ -233,6 +245,5 @@ if PLOT_VECTORS: drawVectors(T, display_pca.components_, df.columns, plt)
 
 # Add the cluster label back into the dataframe and display it:
 df['label'] = pd.Series(labels, index=df.index)
-print df
 
 plt.show()

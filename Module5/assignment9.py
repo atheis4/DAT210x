@@ -9,59 +9,59 @@ matplotlib.style.use('ggplot') # Look Pretty
 
 
 def drawLine(model, X_test, y_test, title, R2):
-  # This convenience method will take care of plotting your
-  # test observations, comparing them to the regression line,
-  # and displaying the R2 coefficient
-  fig = plt.figure()
-  ax = fig.add_subplot(111)
-  ax.scatter(X_test, y_test, c='g', marker='o')
-  ax.plot(X_test, model.predict(X_test), color='orange', linewidth=1, alpha=0.7)
+    # This convenience method will take care of plotting your
+    # test observations, comparing them to the regression line,
+    # and displaying the R2 coefficient
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(X_test, y_test, c='g', marker='o')
+    ax.plot(X_test, model.predict(X_test), color='orange', linewidth=1, alpha=0.7)
 
-  title += " R2: " + str(R2)
-  ax.set_title(title)
-  print title
-  print "Intercept(s): ", model.intercept_
+    title += " R2: " + str(R2)
+    ax.set_title(title)
+    print(title)
+    print('Intercept(s): ', model.intercept_)
 
-  plt.show()
+    plt.show()
 
 def drawPlane(model, X_test, y_test, title, R2):
-  # This convenience method will take care of plotting your
-  # test observations, comparing them to the regression plane,
-  # and displaying the R2 coefficient
-  fig = plt.figure()
-  ax = Axes3D(fig)
-  ax.set_zlabel('prediction')
+    # This convenience method will take care of plotting your
+    # test observations, comparing them to the regression plane,
+    # and displaying the R2 coefficient
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.set_zlabel('prediction')
 
-  # You might have passed in a DataFrame, a Series (slice),
-  # an NDArray, or a Python List... so let's keep it simple:
-  X_test = np.array(X_test)
-  col1 = X_test[:,0]
-  col2 = X_test[:,1]
+    # You might have passed in a DataFrame, a Series (slice),
+    # an NDArray, or a Python List... so let's keep it simple:
+    X_test = np.array(X_test)
+    col1 = X_test[:,0]
+    col2 = X_test[:,1]
 
-  # Set up a Grid. We could have predicted on the actual
-  # col1, col2 values directly; but that would have generated
-  # a mesh with WAY too fine a grid, which would have detracted
-  # from the visualization
-  x_min, x_max = col1.min(), col1.max()
-  y_min, y_max = col2.min(), col2.max()
-  x = np.arange(x_min, x_max, (x_max-x_min) / 10)
-  y = np.arange(y_min, y_max, (y_max-y_min) / 10)
-  x, y = np.meshgrid(x, y)
+    # Set up a Grid. We could have predicted on the actual
+    # col1, col2 values directly; but that would have generated
+    # a mesh with WAY too fine a grid, which would have detracted
+    # from the visualization
+    x_min, x_max = col1.min(), col1.max()
+    y_min, y_max = col2.min(), col2.max()
+    x = np.arange(x_min, x_max, (x_max-x_min) / 10)
+    y = np.arange(y_min, y_max, (y_max-y_min) / 10)
+    x, y = np.meshgrid(x, y)
 
-  # Predict based on possible input values that span the domain
-  # of the x and y inputs:
-  z = model.predict(  np.c_[x.ravel(), y.ravel()]  )
-  z = z.reshape(x.shape)
+    # Predict based on possible input values that span the domain
+    # of the x and y inputs:
+    z = model.predict(  np.c_[x.ravel(), y.ravel()]  )
+    z = z.reshape(x.shape)
 
-  ax.scatter(col1, col2, y_test, c='g', marker='o')
-  ax.plot_wireframe(x, y, z, color='orange', alpha=0.7)
+    ax.scatter(col1, col2, y_test, c='g', marker='o')
+    ax.plot_wireframe(x, y, z, color='orange', alpha=0.7)
+      
+    title += " R2: " + str(R2)
+    ax.set_title(title)
+    print(title)
+    print('Intercept(s): ', model.intercept_)
   
-  title += " R2: " + str(R2)
-  ax.set_title(title)
-  print title
-  print "Intercept(s): ", model.intercept_
-  
-  plt.show()
+    plt.show()
   
 
 
@@ -85,6 +85,8 @@ def drawPlane(model, X_test, y_test, title, R2):
 #
 # .. your code here ..
 
+X = pd.read_csv('Datasets/College.csv', index_col=0)
+
 
 #
 # INFO: This line isn't necessary for your purposes; but we'd just
@@ -104,6 +106,9 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 #
 # .. your code here ..
 
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
 
 
 
@@ -121,11 +126,30 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 #
 # .. your code here ..
 
+X_rb = X.loc[:, 'Room.Board']
+y_acc = X.loc[:, 'Accept']
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_rb, y_acc, test_size=0.3, random_state=7
+)
+
+X_train = X_train.reshape(-1, 1)
+X_test = X_test.reshape(-1, 1)
+y_train = y_train.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+
+
 #
 # TODO: Fit and score your model appropriately. Store the score in the
 # score variable.
 #
 # .. your code here ..
+
+model.fit(X_train, y_train)
+score = model.score(X_test, y_test)
+
 
 # INFO: We'll take it from here, buddy:
 drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
@@ -139,6 +163,24 @@ drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
 # per college.
 #
 # .. your code here ..
+
+X_en = X.loc[:, 'Enroll']
+y_acc = X.loc[:, 'Accept']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_en, y_acc, test_size=0.3, random_state=7
+)
+
+X_train = X_train.reshape(-1, 1)
+X_test = X_test.reshape(-1, 1)
+y_train = y_train.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+score = model.score(X_test, y_test)
+
+
 drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 
 
@@ -149,6 +191,23 @@ drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 # students per college.
 #
 # .. your code here ..
+
+X_f = X.loc[:, 'F.Undergrad']
+y_acc = X.loc[:, 'Accept']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_f, y_acc, test_size=0.3, random_state=7
+)
+
+X_train = X_train.reshape(-1, 1)
+X_test = X_test.reshape(-1, 1)
+y_train = y_train.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+score = model.score(X_test, y_test)
+
 drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 
 
@@ -165,6 +224,22 @@ drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 # inputs. Your training labels will remain a single slice.
 #
 # .. your code here ..
+
+X_rb_en = X.loc[:, ['Room.Board', 'Enroll']]
+y = X.loc[:, 'Accept']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_rb_en, y, test_size=0.3, random_state=7
+)
+
+y_train = y_train.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+score = model.score(X_test, y_test)
+
 drawPlane(model, X_test, y_test, "Accept(Room&Board,Enroll)", score)
 
 
